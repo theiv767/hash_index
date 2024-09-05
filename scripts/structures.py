@@ -43,7 +43,7 @@ class Table:
         return self.primary_key
 
     def get_record(self, primary_key, page_identify):
-        for memored_tuple in self.pages[page_identify]:
+        for memored_tuple in self.pages[page_identify].new_tuples:
             if memored_tuple[self.primary_key] == primary_key:
                 return memored_tuple
 
@@ -93,6 +93,17 @@ class Bucket:
         self.buckets = list()
         for i in range(num_buckets):
             self.buckets.append(list())
+
+    def get_record(self, value):
+        bucket_index = self.hash_function(value, self.num_buckets)
+        for i in self.buckets[bucket_index]:
+            if i[0] == value:
+                page_index = i[1]
+                return self.table_master.get_record(value, page_index)
+
+        return None
+
+
 
     def add_value(self, tuple) -> bool:
         value = tuple[self.table_master.get_primary_key()]

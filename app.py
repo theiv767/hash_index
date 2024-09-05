@@ -65,18 +65,18 @@ with tab1:
 
 # Aba 2: Visualização de Dados
 with tab2:
-    if 'df' in st.session_state:
-        df = st.session_state.df
-        
-        st.write("Selecione as colunas que deseja visualizar:")
-        selected_columns = st.multiselect("Colunas", options=df.columns.tolist(), default=df.columns.tolist())
+    st.title("Visualização de Dados")
 
-        if selected_columns:
-            st.write(df[selected_columns])
-        else:
-            st.write("Nenhuma coluna selecionada.")
+    if 'bucket' in st.session_state:
+        valor_chave = st.text_input("Digite o valor da chave primária:")
+
+        if st.button("Buscar Tupla"):
+            bucket = st.session_state.bucket
+            resultado = bucket.get_record(valor_chave)
+
+            if resultado:
+                st.write("Tupla encontrada:", resultado.fields)
+            else:
+                st.write("Tupla não encontrada.")
     else:
-        st.write("Por favor, carregue um arquivo na aba 'Upload e Configuração' primeiro.")
-
-    if st.button("Buscar"):
-        pass
+        st.write("Por favor, faça o upload do arquivo e configure os buckets na aba 'Upload e Configuração'.")
