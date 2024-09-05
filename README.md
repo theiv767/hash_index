@@ -1,4 +1,4 @@
-# index_hash
+# hash_index
 Trabalho de Ciência da computação da disciplina "Projeto de banco de dados"
 
 
