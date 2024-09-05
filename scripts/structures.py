@@ -91,11 +91,16 @@ class Bucket:
 
         self.buckets = list()
         for i in range(num_buckets):
-            self.buckets.append(list())
+            self.buckets.append((list(), list()))
 
     def get_record(self, value):
         bucket_index = self.hash_function(value, self.num_buckets)
-        for i in self.buckets[bucket_index]:
+        for i in self.buckets[bucket_index][0]:
+            if i[0] == value:
+                page_index = i[1]
+                return self.table_master.get_record(value, page_index)
+
+        for i in self.buckets[bucket_index][1]:
             if i[0] == value:
                 page_index = i[1]
                 return self.table_master.get_record(value, page_index)
@@ -112,7 +117,10 @@ class Bucket:
 
         self.table_master.insert(tuple)
 
-        self.buckets[bucket_id].append((value, self.table_master.last_page))
+        if len(self.buckets[bucket_id][0]) >= self.bucket_size: 
+            self.buckets[bucket_id][1].append((value, self.table_master.last_page))
+        else:    
+            self.buckets[bucket_id][0].append((value, self.table_master.last_page))
 
 
 
