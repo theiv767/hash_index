@@ -27,36 +27,27 @@ with tab1:
         st.write("Aqui estão as primeiras linhas do arquivo carregado:")
         st.write(df.head())
 
-        # Mostrar os valores das variáveis
         st.write(f"Número de Buckets: {numero_buckets}")
         st.write(f"Tamanho dos Buckets: {tamanho_buckets}")
         st.write(f"Tamanho das Páginas: {tamanho_paginas}")
 
-        # Armazenar as configurações no estado da sessão
         st.session_state.df = df
         st.session_state.numero_buckets = numero_buckets
         st.session_state.tamanho_buckets = tamanho_buckets
         st.session_state.tamanho_paginas = tamanho_paginas
 
-        # Botão "Aplicar"
         if st.button("Aplicar"):
             fields = df.columns.tolist()
             bucket_size = tamanho_buckets
             page_size = tamanho_paginas
 
-            # Cria a instância da tabela e do bucket
             table = Table(fields, primary_key, page_size)
             bucket = Bucket(numero_buckets, bucket_size, table)
 
-            # Itera sobre as linhas do DataFrame e adiciona os valores
             for _, row in df.iterrows():
-                # Converte a linha para dicionário e remove espaços em branco
                 row_dict = {k: v.strip() if isinstance(v, str) else v for k, v in row.to_dict().items()}
-
-                # Adiciona a tupla ao bucket
                 bucket.add_value(row_dict)
 
-            # Salvar a tabela e o bucket no estado da sessão
             st.session_state.table = table
             st.session_state.bucket = bucket
 

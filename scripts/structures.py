@@ -51,7 +51,6 @@ class Table:
 
 
     def insert(self, new_tuple) -> bool:
-        #todo --> verificar se a primary_key está preenchida
 
         new_tuple_field_names = list(new_tuple.keys())
 
@@ -106,7 +105,8 @@ class Bucket:
 
 
     def add_value(self, tuple) -> bool:
-        value = tuple[self.table_master.get_primary_key()]
+        value = str(tuple[self.table_master.get_primary_key()])
+        tuple[self.table_master.get_primary_key()] = value
 
         bucket_id = self.hash_function(value, self.num_buckets)
 
