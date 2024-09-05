@@ -24,15 +24,20 @@ class Page:
         self.new_tuples.append(new_tuple)
         pass
 
+    def get_page_Lenght(self):
+        return len(self.new_tuples)
+
 #-------------------------------------------------------------------
 
 class Table:
     def __init__(self, fields, primary_key, page_size=300) -> None:
+        self.last_page = 0
         self.primary_key = primary_key
         self.field_names = fields
         self.pages = list()
+        self.pages.append( Page(self.last_page) )
         self.page_size = page_size
-        self.last_page = 0
+
 
     def get_primary_key(self):
         return self.primary_key
@@ -62,13 +67,13 @@ class Table:
             return False
 
 
-        if len(self.pages) >= self.page_size:
+        if self.pages[self.last_page].get_page_Lenght() >= self.page_size:
             new_page = Page(self.last_page+1)
             self.last_page += 1
             self.pages.append(new_page)
 
 
-        self.pages[self.last_page].append(new_tuple)
+        self.pages[self.last_page].add_new_tuple(new_tuple)
 
 
         return True
@@ -87,18 +92,20 @@ class Bucket:
 
         self.buckets = list()
         for i in range(num_buckets):
-            self.buckets[i] = list()
+            self.buckets.append(list())
 
     def add_value(self, tuple) -> bool:
         value = tuple[self.table_master.get_primary_key()]
-        bucket_id = self.hash_function(value)
+
+        bucket_id = self.hash_function(value, self.num_buckets)
+
         self.table_master.insert(tuple)
 
-        self.buckets[bucket_id] = (value, self.table_master.last_page)
+        self.buckets[bucket_id].append((value, self.table_master.last_page))
 
 
 
-    def hash_function(input, normalize_max_value) -> int:
+    def hash_function(self, input, normalize_max_value):
         ascii_sum = sum(ord(char) ** 3 for char in input)
 
         # normalização
