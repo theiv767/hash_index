@@ -42,13 +42,15 @@ class Table:
     def get_primary_key(self):
         return self.primary_key
 
-    def get_record(self, primary_key, page_identify):
+    def get_tuple(self, primary_key, page_identify):
         for memored_tuple in self.pages[page_identify].new_tuples:
             if memored_tuple[self.primary_key] == primary_key:
                 return memored_tuple
 
         return None
 
+    def get_num_pages(self):
+        return len(self.pages)
 
     def insert(self, new_tuple) -> bool:
 
@@ -88,28 +90,54 @@ class Bucket:
         self.table_master = table_master
         self.num_buckets = num_buckets
         self.bucket_size = bucket_size
+        self.num_overflows = 0
+        self.num_colisions = 0
 
         self.buckets = list()
         for i in range(num_buckets):
+            # OBS1: buckets[i][0] --> Posições regulares do bucket
+            # OBS2: buckets[i][1] --> Posições de overflow do bucket
             self.buckets.append((list(), list()))
 
-    def get_record(self, value):
+
+    def get_tuple(self, value):
         bucket_index = self.hash_function(value, self.num_buckets)
+        num_accessed_pages = 1
         for i in self.buckets[bucket_index][0]:
             if i[0] == value:
                 page_index = i[1]
-                return self.table_master.get_record(value, page_index)
+                return self.table_master.get_tuple(value, page_index), page_index, num_accessed_pages 
 
         for i in self.buckets[bucket_index][1]:
             if i[0] == value:
                 page_index = i[1]
-                return self.table_master.get_record(value, page_index)
+                return self.table_master.get_tuple(value, page_index), page_index, num_accessed_pages
 
-        return None
+        return None, None, None
 
 
+    def get_tuple_seq_search(self, value):
+        
+        num_pages = self.table_master.get_num_pages()
 
-    def add_value(self, tuple) -> bool:
+        for page_index in range(num_pages):
+            memored_tuple = self.table_master.get_tuple(value, page_index)
+            if memored_tuple:
+                return  memored_tuple, page_index, page_index+1
+
+
+        return None, None, None
+
+
+    def get_num_colisions(self):
+        return self.num_colisions
+
+
+    def get_num_overflows(self):
+        return self.num_overflows
+
+
+    def add_tuple(self, tuple) -> bool:
         value = str(tuple[self.table_master.get_primary_key()])
         tuple[self.table_master.get_primary_key()] = value
 
@@ -117,17 +145,25 @@ class Bucket:
 
         self.table_master.insert(tuple)
 
-        if len(self.buckets[bucket_id][0]) >= self.bucket_size: 
+        if len(self.buckets[bucket_id][0]) >= self.bucket_size:
+            self.num_overflows += 1
             self.buckets[bucket_id][1].append((value, self.table_master.last_page))
-        else:    
+        else:
+            if len(self.buckets[bucket_id][0]) > 0:
+                self.num_colisions += 1
             self.buckets[bucket_id][0].append((value, self.table_master.last_page))
 
 
 
     def hash_function(self, input, normalize_max_value):
-        ascii_sum = sum(ord(char) ** 3 for char in input)
+        seed = 2654435761
+        hash_value = seed
+    
+        for i, char in enumerate(input):
+            hash_value ^= (ord(char) + i) * seed # Comparação XOR
+            hash_value = (hash_value << 5) | (hash_value >> 27)  # Rotaciona bits para misturar mais
 
-        # normalização
-        hash_value = ascii_sum % normalize_max_value
+        # "Normalização"
+        hash_value = abs(hash_value) % normalize_max_value
 
         return hash_value
