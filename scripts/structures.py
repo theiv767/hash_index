@@ -146,11 +146,11 @@ class Bucket:
         self.table_master.insert(tuple)
 
         if len(self.buckets[bucket_id][0]) >= self.bucket_size:
-            self.num_overflows += 1
+            if len(self.buckets[bucket_id][1]) == 0:
+                self.num_overflows += 1
             self.buckets[bucket_id][1].append((value, self.table_master.last_page))
+            self.num_colisions += 1
         else:
-            if len(self.buckets[bucket_id][0]) > 0:
-                self.num_colisions += 1
             self.buckets[bucket_id][0].append((value, self.table_master.last_page))
 
 
