@@ -1,5 +1,5 @@
 # hash_index
-This repository contains a Python representation of buckets, tables, memory pages, and tuples. The idea is to simulate the behavior of these components in a database system or memory manager.
+This repository contains a Python representation of buckets, tables, memory pages, tuples and hash functions. The idea is to simulate the behavior of these components in a database system or memory manager.
 
 
 ## dependencies
