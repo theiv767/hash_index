@@ -5,7 +5,7 @@ This repository contains a Python representation of buckets, tables, memory page
 ## dependencies
 
    ```bash
-   python -m streamlit run app.py
+   pip install -r requirements.txt
    ```
 
 ## run
