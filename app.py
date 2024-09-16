@@ -23,10 +23,10 @@ with tab1:
         primary_key = st.text_input("Nome da Primary key", placeholder="O valor padrão é a primeira coluna...")
 
 
-
         bucket_size = st.number_input("Tamanho dos Buckets", min_value=1, value=1)
         page_size = st.number_input("Tamanho das Páginas", min_value=1, value=1)
         num_buckets = math.ceil( len(df)/bucket_size )
+        num_pages = math.ceil( len(df)/page_size )
         
         st.write("Preview - primeiras linhas do arquivo carregado:")
         st.write(df.head())
@@ -40,11 +40,11 @@ with tab1:
             st.write(f"Tamanho das Páginas: {page_size}")
 
 
-
-        st.session_state.df = df
-        st.session_state.num_buckets = num_buckets
-        st.session_state.bucket_size = bucket_size
-        st.session_state.page_size = page_size
+        st.session_state.df             = df
+        st.session_state.num_buckets    = num_buckets
+        st.session_state.num_pages      = num_pages
+        st.session_state.bucket_size    = bucket_size
+        st.session_state.page_size      = page_size
 
         if st.button("Aplicar"):
 
@@ -55,14 +55,14 @@ with tab1:
             #bucket_size = bucket_size
             #page_size = page_size
 
-            table = Table(fields, primary_key, page_size)
+            table = Table(fields, primary_key, num_pages, page_size)
             bucket = Bucket(num_buckets, bucket_size, table)
 
             for _, row in df.iterrows():
                 row_dict = {k: v.strip() if isinstance(v, str) else v for k, v in row.to_dict().items()}
                 bucket.add_tuple(row_dict)
 
-            st.session_state.table = table
+            st.session_state.table  = table
             st.session_state.bucket = bucket
 
             with col2:
@@ -87,9 +87,10 @@ with tab2:
         valor_chave = st.text_input("Digite o valor da chave primária:")
 
         if st.button("Buscar Tupla"):
-            bucket = st.session_state.bucket
-            resultado, page_index, num_accessed_pages = bucket.get_tuple(valor_chave)
-            _, _, num_accessed_pages_seq_search = bucket.get_tuple_seq_search(valor_chave)
+            bucket  = st.session_state.bucket
+
+            resultado, page_index, num_accessed_pages   = bucket.get_tuple(valor_chave)
+            _, _, num_accessed_pages_seq_search         = bucket.get_tuple_seq_search(valor_chave)
 
             if resultado:
                 st.write("Tupla encontrada:", resultado)

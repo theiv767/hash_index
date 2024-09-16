@@ -30,12 +30,15 @@ class Page:
 #-------------------------------------------------------------------
 
 class Table:
-    def __init__(self, fields, primary_key, page_size=300) -> None:
-        self.last_page = 0
+    def __init__(self, fields, primary_key, num_pages, page_size=300) -> None:
+        self.selected_page = 0
         self.primary_key = primary_key
         self.field_names = fields
         self.pages = list()
-        self.pages.append( Page(self.last_page) )
+
+        for page_id in range(num_pages):
+            self.pages.append( Page(page_id) )
+
         self.page_size = page_size
 
 
@@ -68,13 +71,12 @@ class Table:
             return False
 
 
-        if self.pages[self.last_page].get_page_Lenght() >= self.page_size:
-            new_page = Page(self.last_page+1)
-            self.last_page += 1
-            self.pages.append(new_page)
+        if self.pages[self.selected_page].get_page_Lenght() >= self.page_size:
+            self.selected_page += 1
+            
 
 
-        self.pages[self.last_page].add_new_tuple(new_tuple)
+        self.pages[self.selected_page].add_new_tuple(new_tuple)
 
 
         return True
@@ -148,10 +150,10 @@ class Bucket:
         if len(self.buckets[bucket_id][0]) >= self.bucket_size:
             if len(self.buckets[bucket_id][1]) == 0:
                 self.num_overflows += 1
-            self.buckets[bucket_id][1].append((value, self.table_master.last_page))
+            self.buckets[bucket_id][1].append((value, self.table_master.selected_page))
             self.num_colisions += 1
         else:
-            self.buckets[bucket_id][0].append((value, self.table_master.last_page))
+            self.buckets[bucket_id][0].append((value, self.table_master.selected_page))
 
 
 
